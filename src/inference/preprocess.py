@@ -4,8 +4,20 @@ from pathlib import Path
 
 import torch
 from PIL import Image
+from torchvision import transforms
 
-from src.data.transforms import get_eval_transform
+from src.constants import IMAGENET_MEAN, IMAGENET_STD
+
+
+def get_eval_transform():
+    return transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        ]
+    )
 
 
 def load_cxr_as_rgb(path: str | Path) -> Image.Image:

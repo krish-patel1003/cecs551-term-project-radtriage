@@ -17,9 +17,16 @@ from src.constants import CLASSES
 from src.inference.pipeline import RadTriagePipeline
 from src.models.densenet import RadTriageDenseNet
 
-DEFAULT_CHECKPOINT = str(PROJECT_ROOT / "src" / "best_radtriage_model_full_run2.pt")
-DEFAULT_THRESHOLDS = str(PROJECT_ROOT / "src" / "best_thresholds_full.json")
+DEFAULT_CHECKPOINT = str(
+    PROJECT_ROOT / "kaggle" / "kaggle_run_2" / "best_radtriage_model_full_run2.pt"
+)
+DEFAULT_THRESHOLDS = str(
+    PROJECT_ROOT / "kaggle" / "kaggle_run_1" / "best_thresholds_full.json"
+)
 DEFAULT_SAMPLE_ROOT = str(PROJECT_ROOT / "data" / "sample")
+DEFAULT_METRICS_CSV = str(
+    PROJECT_ROOT / "kaggle" / "kaggle_run_1" / "test_metrics_full.csv"
+)
 
 
 def load_thresholds(thresholds_path: str) -> dict:
@@ -28,26 +35,6 @@ def load_thresholds(thresholds_path: str) -> dict:
         return {cls: 0.5 for cls in CLASSES}
     data = json.loads(path.read_text(encoding="utf-8"))
     return {cls: float(data.get(cls, 0.5)) for cls in CLASSES}
-
-
-def download_sample_dataset() -> str:
-    try:
-        import kagglehub
-    except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            "kagglehub is not installed. Install it with: pip install kagglehub"
-        ) from exc
-
-    return kagglehub.dataset_download("nih-chest-xrays/sample")
-
-
-def kagglehub_status() -> tuple[bool, str]:
-    try:
-        import kagglehub
-
-        return True, f"kagglehub {kagglehub.__version__}"
-    except Exception as exc:
-        return False, str(exc)
 
 
 def list_sample_images(sample_root: str) -> list[str]:
@@ -75,7 +62,7 @@ def get_sample_root(manual_path: str) -> Optional[str]:
     default_path = Path(DEFAULT_SAMPLE_ROOT)
     if default_path.exists():
         return str(default_path.resolve())
-    return st.session_state.get("sample_dataset_root")
+    return None
 
 
 @st.cache_data
@@ -178,7 +165,7 @@ def render_single_case(
     else:
         if not sample_images:
             st.info(
-                "No sample images found. Set a sample dataset directory in the sidebar or download with kagglehub."
+                "No sample images found. Set the sample dataset directory in the sidebar."
             )
             return
         selected_path = st.selectbox(
@@ -257,7 +244,7 @@ def render_worklist(pipeline: RadTriagePipeline, sample_images: list[str]):
     else:
         if not sample_images:
             st.info(
-                "No sample images found. Set a sample dataset directory in the sidebar or download with kagglehub."
+                "No sample images found. Set the sample dataset directory in the sidebar."
             )
             return
         selected = st.multiselect(
@@ -284,44 +271,39 @@ def render_worklist(pipeline: RadTriagePipeline, sample_images: list[str]):
     st.dataframe(ranked, width="stretch")
 
 
-def render_metrics():
+def render_metrics(metrics_csv_path: str):
     st.subheader("Metrics")
-    metrics_path = Path("outputs/metrics/test_metrics.json")
-    per_class_path = Path("outputs/metrics/per_class_metrics.csv")
-    if metrics_path.exists():
-        st.json(json.loads(metrics_path.read_text(encoding="utf-8")))
-    else:
-        st.info("No test metrics found yet.")
-    if per_class_path.exists():
-        st.dataframe(pd.read_csv(per_class_path), width="stretch")
+    path = Path(metrics_csv_path)
+    if not path.exists():
+        st.info("No metrics CSV found.")
+        return
+
+    df = pd.read_csv(path)
+    if not {"auc", "f1", "sensitivity", "specificity"}.issubset(df.columns):
+        st.dataframe(df, width="stretch")
+        return
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Macro AUC", f"{df['auc'].mean():.3f}")
+    c2.metric("Macro F1", f"{df['f1'].mean():.3f}")
+    c3.metric("Mean Sensitivity", f"{df['sensitivity'].mean():.3f}")
+    c4.metric("Mean Specificity", f"{df['specificity'].mean():.3f}")
+    st.dataframe(df.sort_values("auc", ascending=False), width="stretch")
 
 
 def main():
     st.set_page_config(page_title="RadTriage AI", layout="wide")
     st.title("RadTriage AI Dashboard")
     st.sidebar.caption(f"Python: {sys.executable}")
-    ok, kh_status = kagglehub_status()
-    if ok:
-        st.sidebar.success(f"{kh_status} available")
-    else:
-        st.sidebar.error(f"kagglehub unavailable: {kh_status}")
     checkpoint_path = st.sidebar.text_input("Checkpoint path", value=DEFAULT_CHECKPOINT)
     thresholds_path = st.sidebar.text_input("Thresholds path", value=DEFAULT_THRESHOLDS)
+    metrics_csv_path = st.sidebar.text_input(
+        "Metrics CSV path", value=DEFAULT_METRICS_CSV
+    )
     manual_sample_dir = st.sidebar.text_input(
         "Sample dataset path",
         value=DEFAULT_SAMPLE_ROOT,
     )
-    if st.sidebar.button("Download sample subset with kagglehub"):
-        try:
-            st.session_state["sample_dataset_root"] = download_sample_dataset()
-            st.sidebar.success(
-                f"Downloaded sample subset: {st.session_state['sample_dataset_root']}"
-            )
-        except Exception as exc:
-            st.sidebar.error(f"Download failed: {exc}")
-            st.sidebar.info(
-                "Run `pip install kagglehub` in your active .venv, then click again."
-            )
 
     sample_root = get_sample_root(manual_sample_dir)
     sample_images = list_sample_images(sample_root) if sample_root else []
@@ -345,7 +327,7 @@ def main():
     with tabs[1]:
         render_worklist(pipeline, sample_images)
     with tabs[2]:
-        render_metrics()
+        render_metrics(metrics_csv_path)
 
 
 if __name__ == "__main__":

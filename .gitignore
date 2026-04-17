@@ -44,3 +44,8 @@ checkpoints/*.ckpt
 # Local model assets (optional)
 src/*.pt
 src/*.pth
+
+# Kaggle artifacts
+kaggle/**/*.pt
+kaggle/**/*.pth
+kaggle/**/.ipynb_checkpoints/
