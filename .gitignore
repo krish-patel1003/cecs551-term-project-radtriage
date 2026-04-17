@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Runtime artifacts
+outputs/*
+!outputs/.gitkeep
+!outputs/metrics/.gitkeep
+!outputs/predictions/.gitkeep
+!outputs/heatmaps/.gitkeep
+!outputs/demo_cases/.gitkeep
+
+# Data artifacts
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/images/
+data/raw/images/*
+!data/raw/images/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/splits/*
+!data/splits/.gitkeep
+data/sample/
+
+# Model/checkpoint artifacts
+checkpoints/*.pt
+checkpoints/*.pth
+checkpoints/*.ckpt
+
+# Local model assets (optional)
+src/*.pt
+src/*.pth
