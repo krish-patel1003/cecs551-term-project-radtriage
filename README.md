@@ -29,8 +29,8 @@ You can override these paths from the app sidebar.
 
 ## Documentation
 
-See `docs/PROJECT_REPORT.md` for:
+Use these docs directly for reporting:
 
-- Data summary and label schema
-- Model architecture
-- Evaluation results and score summary
+- `docs/PROJECT_REPORT.md` - consolidated project summary and key results
+- `docs/TECHNICAL_ARCHITECTURE.md` - architecture and code walkthrough
+- `docs/PROTOTYPE_PROGRESS_REPORT.md` - progress-report-ready status and milestones

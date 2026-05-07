@@ -1,0 +1,96 @@
+{
+  "n_test": 25596,
+  "overall_triage_accuracy": 0.3239,
+  "emergent_recall": 0.6224,
+  "emergent_precision": 0.3358,
+  "emergent_f1": 0.4363,
+  "urgent_recall": 0.5903,
+  "urgent_precision": 0.31,
+  "urgent_f1": 0.4066,
+  "routine_recall": 0.0,
+  "routine_precision": 0.0,
+  "routine_f1": 0.0,
+  "tier_distribution": {
+    "true": {
+      "Emergent": 7431,
+      "Urgent": 6210,
+      "Routine": 11955
+    },
+    "pred": {
+      "Emergent": 13772,
+      "Urgent": 11824,
+      "Routine": 0
+    }
+  },
+  "emergent_breakdown": {
+    "total_true_emergent": 7431,
+    "correctly_elevated": 4625,
+    "downgraded_urgent": 2806,
+    "downgraded_routine": 0
+  },
+  "confusion_matrix": [
+    [
+      4625,
+      2806,
+      0
+    ],
+    [
+      2544,
+      3666,
+      0
+    ],
+    [
+      6603,
+      5352,
+      0
+    ]
+  ],
+  "macro_auc": 0.777,
+  "macro_f1": 0.275,
+  "mean_sensitivity": 0.5569,
+  "mean_specificity": 0.8242,
+  "ranking_auroc_emergent_vs_rest": 0.5818,
+  "ranking_auroc_urgentplus_vs_routine": 0.6283,
+  "topk_emergent_recall": {
+    "top5pct": 0.07,
+    "top10pct": 0.137,
+    "top15pct": 0.2024,
+    "top20pct": 0.2623,
+    "top25pct": 0.3207,
+    "top30pct": 0.3775,
+    "top40pct": 0.4878,
+    "top50pct": 0.5927
+  },
+  "calibrated_thresholds": {
+    "emergent_thr": 4.37,
+    "urgent_thr": 4.022
+  },
+  "calibrated_accuracy": 0.2906,
+  "calibrated_emergent_recall": 1.0,
+  "calibrated_emergent_prec": 0.2904,
+  "raw_score_stats": {
+    "min": 0.698,
+    "max": 5.616,
+    "mean": 4.039,
+    "std": 0.544,
+    "pct_exceed_original_cap_1": 0.9997
+  },
+  "calibration_issue": "Original thresholds (0.75/0.40) designed for binary inputs. 99.97% of sigmoid-based scores exceed cap of 1.0, destroying ranking signal.",
+  "calibrated_tier_performance": {
+    "overall_accuracy": 0.3588,
+    "emergent_precision": 0.3628,
+    "emergent_recall": 0.5839,
+    "emergent_f1": 0.4475,
+    "urgent_precision": 0.3092,
+    "urgent_recall": 0.5953,
+    "urgent_f1": 0.407,
+    "routine_precision": 0.6843,
+    "routine_recall": 0.0961,
+    "routine_f1": 0.1685
+  },
+  "worklist_simulation": {
+    "median_ai_rank_emergent": 10534,
+    "median_random_rank_emergent": 12798,
+    "speedup_factor": 1.21
+  }
+}
